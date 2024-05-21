@@ -67,4 +67,40 @@ impl Cpu {
         self.sp -= 1;
         self.stack[self.sp as usize]
     }
+
+    fn fetch(&mut self) -> u16 {
+        let hi = self.memory[self.pc as usize] as u16;
+        let lo = self.memory[(self.pc + 1) as usize] as u16;
+        self.pc += 2;
+        (hi << 8) | lo
+    }
+
+    fn decode_and_execute(&mut self, opcode: u16) {
+        let digit1 = (opcode & 0xF000) >> 12;
+        let digit2 = (opcode & 0x0F00) >> 8;
+        let digit3 = (opcode & 0x00F0) >> 4;
+        let digit4 = opcode & 0x000F;
+
+        match (digit1, digit2, digit3, digit4) {
+            (0, 0, 0xE, 0) => {
+                self.screen = [false; SCREEN_WIDTH * SCREEN_HEIGHT];
+            }
+            (1, _, _, _) => self.pc = opcode & 0x0FFF,
+            (6, _, _, _) => {
+                let reg = (opcode & 0x0F00) >> 8;
+                let num = opcode & 0x00FF;
+                self.v_reg[reg as usize] = num as u8;
+            }
+            (7, _, _, _) => {
+                let reg = (opcode & 0x0F00) >> 8;
+                let num = opcode & 0x00FF;
+                self.v_reg[reg as usize] += num as u8;
+            }
+            (0xA, _, _, _) => {
+                let num = opcode & 0x0FFF;
+                self.i_reg = num;
+            }
+            (_, _, _, _) => todo!(),
+        }
+    }
 }
