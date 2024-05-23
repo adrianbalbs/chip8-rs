@@ -69,6 +69,15 @@ impl Cpu {
         self.decode_and_execute(op);
     }
 
+    pub fn decrement_timers(&mut self) {
+        if self.dt_reg > 0 {
+            self.dt_reg -= 1;
+        }
+        if self.st_reg > 0 {
+            self.st_reg -= 1;
+        }
+    }
+
     pub fn run(&mut self) {
         loop {
             self.tick();
@@ -76,6 +85,7 @@ impl Cpu {
         }
     }
 
+    // Temporary function to check if screen works properly
     fn print_screen(&self) {
         for y in self.display {
             for x in y {
