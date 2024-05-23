@@ -27,7 +27,7 @@ const FONTSET: [u8; FONTSET_SIZE] = [
 
 #[derive(Debug)]
 #[allow(dead_code)]
-struct Cpu {
+pub struct Cpu {
     memory: [u8; MEM_SIZE],
     v_reg: [u8; STACK_SIZE],
     stack: [u16; REG_SIZE],
@@ -62,6 +62,28 @@ impl Cpu {
         let start = PC_START as usize;
         let end = start + data.len();
         self.memory[start..end].copy_from_slice(data);
+    }
+
+    pub fn tick(&mut self) {
+        let op = self.fetch();
+        self.decode_and_execute(op);
+    }
+
+    pub fn run(&mut self) {
+        loop {
+            self.tick();
+            self.print_screen();
+        }
+    }
+
+    fn print_screen(&self) {
+        for y in self.display {
+            for x in y {
+                let pixel = if x { "*" } else { "." };
+                print!("{pixel}");
+            }
+            println!();
+        }
     }
 
     fn push(&mut self, val: u16) {
@@ -140,5 +162,11 @@ impl Cpu {
             }
             (_, _, _, _) => unimplemented!(),
         }
+    }
+}
+
+impl Default for Cpu {
+    fn default() -> Self {
+        Self::new()
     }
 }
