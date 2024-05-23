@@ -41,7 +41,7 @@ pub struct Cpu {
 
 #[allow(dead_code)]
 impl Cpu {
-    pub fn new() -> Self {
+    pub fn init(data: &[u8]) -> Self {
         let mut cpu = Cpu {
             memory: [0; MEM_SIZE],
             v_reg: [0; STACK_SIZE],
@@ -54,14 +54,10 @@ impl Cpu {
             sp: 0,
         };
         cpu.memory[..FONTSET_SIZE].copy_from_slice(&FONTSET);
-
-        cpu
-    }
-
-    pub fn load(&mut self, data: &[u8]) {
         let start = PC_START as usize;
         let end = start + data.len();
-        self.memory[start..end].copy_from_slice(data);
+        cpu.memory[start..end].copy_from_slice(data);
+        cpu
     }
 
     pub fn tick(&mut self) {
@@ -80,9 +76,16 @@ impl Cpu {
 
     pub fn run(&mut self) {
         loop {
-            self.tick();
+            for _ in 0..10 {
+                self.tick();
+            }
+            self.decrement_timers();
             self.print_screen();
         }
+    }
+
+    pub fn get_display(&self) -> &[[bool; SCREEN_WIDTH]; SCREEN_HEIGHT] {
+        &self.display
     }
 
     // Temporary function to check if screen works properly
@@ -172,11 +175,5 @@ impl Cpu {
             }
             (_, _, _, _) => unimplemented!(),
         }
-    }
-}
-
-impl Default for Cpu {
-    fn default() -> Self {
-        Self::new()
     }
 }
