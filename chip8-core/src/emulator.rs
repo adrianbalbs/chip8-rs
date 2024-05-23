@@ -82,23 +82,55 @@ impl Cpu {
         let digit4 = opcode & 0x000F;
 
         match (digit1, digit2, digit3, digit4) {
+            // 00E0 clear screen
             (0, 0, 0xE, 0) => {
                 self.display = [[false; SCREEN_WIDTH]; SCREEN_HEIGHT];
             }
+
+            // 1NNN jump
             (1, _, _, _) => self.pc = opcode & 0x0FFF,
+
+            // 6XNN Set register VX
             (6, _, _, _) => {
                 let reg = (opcode & 0x0F00) >> 8;
                 let num = opcode & 0x00FF;
                 self.v_reg[reg as usize] = num as u8;
             }
+
+            // 7XNN Add value to register VX
             (7, _, _, _) => {
                 let reg = (opcode & 0x0F00) >> 8;
                 let num = opcode & 0x00FF;
                 self.v_reg[reg as usize] += num as u8;
             }
+
+            // ANNN Set index register I
             (0xA, _, _, _) => {
                 let num = opcode & 0x0FFF;
                 self.i_reg = num;
+            }
+
+            // DXYN display
+            // Deal with clipping later
+            (0xD, x, y, n) => {
+                let x_coord = self.v_reg[x as usize] as u16 % 64;
+                let y_coord = self.v_reg[y as usize] as u16 % 32;
+                self.v_reg[0xF] = 0;
+                for y_cur in 0..n {
+                    let pixel = self.memory[(self.i_reg + y_cur) as usize];
+                    for x_cur in 0..8 {
+                        let x = x_coord + x_cur;
+                        let y = y_coord + y_cur;
+                        let screen_pixel = self.display[y as usize][x as usize];
+                        let sprite_pixel = pixel & (0b1000_0000 >> x_cur);
+                        if sprite_pixel != 0 {
+                            if screen_pixel {
+                                self.v_reg[0xF] = 1;
+                            }
+                            self.display[y as usize][x as usize] ^= true;
+                        }
+                    }
+                }
             }
             (_, _, _, _) => todo!(),
         }
