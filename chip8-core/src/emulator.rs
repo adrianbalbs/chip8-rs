@@ -31,7 +31,7 @@ struct Cpu {
     memory: [u8; MEM_SIZE],
     v_reg: [u8; STACK_SIZE],
     stack: [u16; REG_SIZE],
-    screen: [bool; SCREEN_WIDTH * SCREEN_HEIGHT],
+    display: [[bool; SCREEN_WIDTH]; SCREEN_HEIGHT],
     i_reg: u16,
     dt_reg: u8,
     st_reg: u8,
@@ -46,7 +46,7 @@ impl Cpu {
             memory: [0; MEM_SIZE],
             v_reg: [0; STACK_SIZE],
             stack: [0; REG_SIZE],
-            screen: [false; SCREEN_WIDTH * SCREEN_HEIGHT],
+            display: [[false; SCREEN_WIDTH]; SCREEN_HEIGHT],
             i_reg: 0,
             dt_reg: 0,
             st_reg: 0,
@@ -83,7 +83,7 @@ impl Cpu {
 
         match (digit1, digit2, digit3, digit4) {
             (0, 0, 0xE, 0) => {
-                self.screen = [false; SCREEN_WIDTH * SCREEN_HEIGHT];
+                self.display = [[false; SCREEN_WIDTH]; SCREEN_HEIGHT];
             }
             (1, _, _, _) => self.pc = opcode & 0x0FFF,
             (6, _, _, _) => {
