@@ -1,1 +1,1 @@
-workspace = { members = ["chip8-core"], resolver = "2" }
+workspace = { members = ["chip8-core", "frontend"], resolver = "2" }
