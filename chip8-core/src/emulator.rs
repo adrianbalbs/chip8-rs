@@ -58,6 +58,12 @@ impl Cpu {
         cpu
     }
 
+    pub fn load(&mut self, data: &[u8]) {
+        let start = PC_START as usize;
+        let end = start + data.len();
+        self.memory[start..end].copy_from_slice(data);
+    }
+
     fn push(&mut self, val: u16) {
         self.stack[self.sp as usize] = val;
         self.sp += 1;
@@ -132,7 +138,7 @@ impl Cpu {
                     }
                 }
             }
-            (_, _, _, _) => todo!(),
+            (_, _, _, _) => unimplemented!(),
         }
     }
 }
